@@ -126,7 +126,7 @@ Migrations/           EF Core migrations
 | `/BlogPost/Create`, `/BlogPost/Edit/{id}` | Built-in editor |
 | `/BlogPost/MyPosts` | Current user's articles |
 | `/User/Login`, `/User/Signup` | Authentication |
-| `/User/Profile/{username}` | Public author profile |
+| `/User/PublicProfile?userName={username}` | Public author profile |
 | `/Home/Privacy` | Privacy policy |
 
 ### JSON API
