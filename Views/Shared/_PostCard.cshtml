@@ -1,0 +1,64 @@
+@model BlogPost
+@inject IImageService Images
+@{
+    var cover = Images.Url("PostImages", Model.ImageUrl);
+    var categoryName = Model.Category?.Name;
+    var authorName = Model.User?.DisplayName ?? (L.IsRtl ? "فريق بيان" : "Bayan Editorial");
+    var authorInitials = Model.User?.Initials ?? (L.IsRtl ? "ب" : "B");
+    var authorAvatar = Images.Url("UserImages", Model.User?.ProfileImagePath);
+    var minutes = ArticleContent.ReadMinutes(Model.Content);
+}
+<article class="post-card">
+    <a class="post-card-cover" asp-controller="BlogPost" asp-action="Details" asp-route-id="@Model.Id" tabindex="-1" aria-hidden="true">
+        @if (!string.IsNullOrWhiteSpace(cover))
+        {
+            <img src="@cover" alt="" loading="lazy" />
+        }
+        else
+        {
+            <span class="cover-placeholder">
+                @Html.Icon("book-open", size: 30)
+                <span>@(categoryName ?? L["nav.brandTagline"])</span>
+            </span>
+        }
+    </a>
+
+    <div class="post-card-body">
+        <div class="post-card-kicker">
+            @if (!string.IsNullOrWhiteSpace(categoryName))
+            {
+                <span class="chip chip-muted">@categoryName</span>
+            }
+            <span class="post-read">
+                @Html.Icon("clock", size: 14)
+                <span>@L.Format("post.minRead", minutes)</span>
+            </span>
+        </div>
+
+        <h3 class="post-card-title">
+            <a asp-controller="BlogPost" asp-action="Details" asp-route-id="@Model.Id">@Model.Title</a>
+        </h3>
+
+        <p class="post-card-excerpt">@ArticleContent.Excerpt(Model.Content)</p>
+
+        <div class="post-card-footer">
+            <div class="post-author">
+                @Html.Avatar(authorAvatar, authorInitials, authorName, "avatar-xs")
+                <div class="post-author-text">
+                    <span class="post-author-name">@authorName</span>
+                    <span class="post-author-date">@L.Date(Model.CreatedAt)</span>
+                </div>
+            </div>
+            <div class="post-stats">
+                <span title="@L["post.commentsTitle"]">
+                    @Html.Icon("message", size: 15)
+                    <span>@Model.Comments.Count</span>
+                </span>
+                <span title="@L["post.like"]">
+                    @Html.Icon("heart", size: 15)
+                    <span>@Model.Likes.Count</span>
+                </span>
+            </div>
+        </div>
+    </div>
+</article>

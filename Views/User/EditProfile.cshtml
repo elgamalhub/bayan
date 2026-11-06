@@ -1,0 +1,196 @@
+﻿@model EditProfileViewModel
+@{
+    ViewData["Title"] = L["profile.editTitle"];
+    ViewData["Description"] = L["profile.editSubtitle"];
+
+    var displayName = string.IsNullOrWhiteSpace(Model.FullName) ? Model.Username : Model.FullName!;
+    var parts = displayName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    var initials = parts.Length switch
+    {
+        0 => "?",
+        1 => parts[0][..Math.Min(2, parts[0].Length)].ToUpperInvariant(),
+        _ => string.Concat(parts[0][0], parts[^1][0]).ToUpperInvariant()
+    };
+}
+<section class="page-header">
+    <div class="container">
+        <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+            <a asp-controller="Home" asp-action="Index">@L["nav.home"]</a>
+            <span aria-hidden="true">/</span>
+            <a asp-controller="User" asp-action="PublicProfile" asp-route-userName="@Model.Username">@L["profile.title"]</a>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">@L["common.edit"]</span>
+        </nav>
+
+        <div class="page-header-row">
+            <div>
+                <span class="eyebrow">@L["profile.title"]</span>
+                <h1>@L["profile.editTitle"]</h1>
+                <p>@L["profile.editSubtitle"]</p>
+            </div>
+            <a class="btn btn-ghost" asp-controller="User" asp-action="PublicProfile" asp-route-userName="@Model.Username">
+                @Html.Icon("eye", size: 17)
+                @L["profile.viewProfile"]
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="page-section">
+    <div class="container">
+        <div class="settings-layout">
+            <aside class="settings-aside">
+                <div class="aside-card profile-preview-card">
+                    <span class="eyebrow">@L["profile.previewNote"]</span>
+                    <div class="profile-preview-head">
+                        <div class="profile-photo @(string.IsNullOrWhiteSpace(Model.ExistingImageUrl) ? "" : "has-image")"
+                             data-preview-wrap>
+                            <img id="profilePreview" src="@Model.ExistingImageUrl" alt=""
+                                 data-preview-img hidden="@(string.IsNullOrWhiteSpace(Model.ExistingImageUrl))" />
+                            <span class="avatar avatar-xl avatar-initials" data-preview-fallback>@initials</span>
+                        </div>
+                        <div>
+                            <h2>@displayName</h2>
+                            <span class="profile-handle">@@@Model.Username</span>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(Model.Bio))
+                    {
+                        <p class="profile-preview-bio">@Model.Bio</p>
+                    }
+                    else
+                    {
+                        <p class="profile-preview-bio muted">@L["profile.noBio"]</p>
+                    }
+
+                    <div class="profile-links">
+                        @if (!string.IsNullOrWhiteSpace(Model.WebsiteUrl))
+                        {
+                            <span>@Html.Icon("globe", size: 15) @Model.WebsiteUrl</span>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.LinkedInUrl))
+                        {
+                            <span>@Html.Icon("linkedin", size: 15) LinkedIn</span>
+                        }
+                    </div>
+                </div>
+
+                <div class="aside-card">
+                    <h2>@L["profile.tipsTitle"]</h2>
+                    <ul class="check-list">
+                        <li>@L["profile.tip1"]</li>
+                        <li>@L["profile.tip2"]</li>
+                        <li>@L["profile.tip3"]</li>
+                    </ul>
+                </div>
+            </aside>
+
+            <div class="settings-main">
+                <form asp-controller="User" asp-action="EditProfile" method="post"
+                      enctype="multipart/form-data" class="settings-form">
+                    <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
+
+                    <section class="form-card">
+                        <div class="form-card-head">
+                            <h2>@L["profile.picture"]</h2>
+                            <p>@L["profile.pictureHint"]</p>
+                        </div>
+                        <div class="photo-uploader">
+                            <div class="profile-photo profile-photo-lg" data-preview-wrap>
+                                <img id="profilePreviewLarge" src="@Model.ExistingImageUrl" alt=""
+                                     data-preview-img hidden="@(string.IsNullOrWhiteSpace(Model.ExistingImageUrl))" />
+                                <span class="avatar avatar-xl avatar-initials" data-preview-fallback>@initials</span>
+                            </div>
+                            <div class="photo-uploader-actions">
+                                <label class="btn btn-ghost btn-sm" for="ProfileImage">
+                                    @Html.Icon("upload", size: 15)
+                                    @L["profile.changePhoto"]
+                                </label>
+                                <input asp-for="ProfileImage" id="ProfileImage" type="file" class="visually-hidden"
+                                       accept=".jpg,.jpeg,.png,.gif,.webp"
+                                       data-image-input data-preview="#profilePreviewLarge" data-preview-second="#profilePreview" />
+                                <span class="form-hint">JPG, PNG, GIF or WebP · 5 MB</span>
+                                <span asp-validation-for="ProfileImage" class="field-error"></span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="form-card">
+                        <div class="form-card-head">
+                            <h2>@L["profile.title"]</h2>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <label asp-for="FullName">@L["profile.fullName"]</label>
+                                <input asp-for="FullName" class="form-control"
+                                       placeholder="@L["profile.fullNamePlaceholder"]" />
+                                <span class="form-hint">@L["profile.fullNameHint"]</span>
+                                <span asp-validation-for="FullName" class="field-error"></span>
+                            </div>
+
+                            <div class="form-field">
+                                <label asp-for="Username">@L["profile.username"]</label>
+                                <input asp-for="Username" class="form-control" autocomplete="username" />
+                                <span class="form-hint">@L["val.username"]</span>
+                                <span asp-validation-for="Username" class="field-error"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-field">
+                            <label asp-for="Email">@L["profile.email"]</label>
+                            <input asp-for="Email" type="email" class="form-control" autocomplete="email" />
+                            <span class="form-hint">@L["profile.emailHint"]</span>
+                            <span asp-validation-for="Email" class="field-error"></span>
+                        </div>
+
+                        <div class="form-field">
+                            <label asp-for="Bio">@L["profile.bio"]</label>
+                            <textarea asp-for="Bio" class="form-control" rows="4" maxlength="400"
+                                      placeholder="@L["profile.bioPlaceholder"]" data-count-target="bioCount"></textarea>
+                            <span class="form-hint" id="bioCount" data-char-counter-for="Bio">0 / 400</span>
+                            <span asp-validation-for="Bio" class="field-error"></span>
+                        </div>
+                    </section>
+
+                    <section class="form-card">
+                        <div class="form-card-head">
+                            <h2>@L["profile.links"]</h2>
+                            <p>@L["profile.linksHint"]</p>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <label asp-for="WebsiteUrl">@L["profile.website"]</label>
+                                <input asp-for="WebsiteUrl" class="form-control" type="url" dir="ltr"
+                                       placeholder="https://example.com" />
+                                <span asp-validation-for="WebsiteUrl" class="field-error"></span>
+                            </div>
+
+                            <div class="form-field">
+                                <label asp-for="LinkedInUrl">@L["profile.linkedin"]</label>
+                                <input asp-for="LinkedInUrl" class="form-control" type="url" dir="ltr"
+                                       placeholder="https://linkedin.com/in/username" />
+                                <span asp-validation-for="LinkedInUrl" class="field-error"></span>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="form-actions">
+                        <a class="btn btn-ghost" asp-controller="User" asp-action="PublicProfile" asp-route-userName="@Model.Username">
+                            @L["common.cancel"]
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            @Html.Icon("check", size: 17)
+                            @L["profile.save"]
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

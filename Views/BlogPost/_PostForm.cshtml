@@ -1,0 +1,172 @@
+@model PostFormViewModel
+@inject IImageService Images
+@{
+    var coverUrl = Images.Url("PostImages", Model.ExistingImageUrl);
+    var formAction = Model.IsEdit
+        ? Url.Action("Edit", "BlogPost", new { id = Model.Id })
+        : Url.Action("Create", "BlogPost");
+    var initialContent = ArticleContent.Render(Model.Content);
+}
+<form class="editor-form" id="postForm" method="post" enctype="multipart/form-data" action="@formAction">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="ExistingImageUrl" />
+    <input type="hidden" asp-for="RemoveCover" data-cover-remove-input />
+
+    <div class="editor-layout">
+        <div class="editor-main">
+            <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
+
+            <div class="form-field">
+                <label asp-for="Title">@L["editor.titleLabel"]</label>
+                <input asp-for="Title" class="form-control form-control-lg" maxlength="100"
+                       placeholder="@L["editor.titlePlaceholder"]" autocomplete="off" />
+                <span asp-validation-for="Title" class="field-error"></span>
+            </div>
+
+            <div class="form-field">
+                <label asp-for="CategoryId">@L["editor.categoryLabel"]</label>
+                <select asp-for="CategoryId" asp-items="Model.Categories" class="form-select">
+                    <option value="">@L["editor.categoryPlaceholder"]</option>
+                </select>
+                <span asp-validation-for="CategoryId" class="field-error"></span>
+            </div>
+
+            <div class="form-field">
+                <label for="Content">@L["editor.contentLabel"]</label>
+
+                <div class="editor" data-editor data-input="Content">
+                    <div class="editor-toolbar" role="toolbar" aria-label="@L["editor.contentLabel"]">
+                        <div class="editor-toolgroup">
+                            <button type="button" class="editor-tool" data-cmd="undo" title="@L["editor.toolbar.undo"]" aria-label="@L["editor.toolbar.undo"]">
+                                @Html.Icon("undo", size: 17)
+                            </button>
+                            <button type="button" class="editor-tool" data-cmd="redo" title="@L["editor.toolbar.redo"]" aria-label="@L["editor.toolbar.redo"]">
+                                @Html.Icon("redo", size: 17)
+                            </button>
+                        </div>
+
+                        <div class="editor-toolgroup">
+                            <button type="button" class="editor-tool" data-cmd="formatBlock" data-value="h2" title="@L["editor.toolbar.h2"]" aria-label="@L["editor.toolbar.h2"]">
+                                @Html.Icon("h2", size: 17)
+                            </button>
+                            <button type="button" class="editor-tool" data-cmd="formatBlock" data-value="h3" title="@L["editor.toolbar.h3"]" aria-label="@L["editor.toolbar.h3"]">
+                                @Html.Icon("h3", size: 17)
+                            </button>
+                            <button type="button" class="editor-tool" data-cmd="formatBlock" data-value="p" title="@L["editor.toolbar.paragraph"]" aria-label="@L["editor.toolbar.paragraph"]">
+                                @Html.Icon("paragraph", size: 17)
+                            </button>
+                        </div>
+
+                        <div class="editor-toolgroup">
+                            <button type="button" class="editor-tool" data-cmd="bold" title="@L["editor.toolbar.bold"]" aria-label="@L["editor.toolbar.bold"]">
+                                @Html.Icon("bold", size: 17)
+                            </button>
+                            <button type="button" class="editor-tool" data-cmd="italic" title="@L["editor.toolbar.italic"]" aria-label="@L["editor.toolbar.italic"]">
+                                @Html.Icon("italic", size: 17)
+                            </button>
+                            <button type="button" class="editor-tool" data-cmd="underline" title="@L["editor.toolbar.underline"]" aria-label="@L["editor.toolbar.underline"]">
+                                @Html.Icon("underline", size: 17)
+                            </button>
+                            <button type="button" class="editor-tool" data-cmd="strikeThrough" title="@L["editor.toolbar.strike"]" aria-label="@L["editor.toolbar.strike"]">
+                                @Html.Icon("strike", size: 17)
+                            </button>
+                        </div>
+
+                        <div class="editor-toolgroup">
+                            <button type="button" class="editor-tool" data-cmd="insertUnorderedList" title="@L["editor.toolbar.bulletList"]" aria-label="@L["editor.toolbar.bulletList"]">
+                                @Html.Icon("list", size: 17)
+                            </button>
+                            <button type="button" class="editor-tool" data-cmd="insertOrderedList" title="@L["editor.toolbar.numberedList"]" aria-label="@L["editor.toolbar.numberedList"]">
+                                @Html.Icon("list-ordered", size: 17)
+                            </button>
+                            <button type="button" class="editor-tool" data-cmd="formatBlock" data-value="blockquote" title="@L["editor.toolbar.quote"]" aria-label="@L["editor.toolbar.quote"]">
+                                @Html.Icon("quote", size: 17)
+                            </button>
+                            <button type="button" class="editor-tool" data-cmd="formatBlock" data-value="pre" title="@L["editor.toolbar.code"]" aria-label="@L["editor.toolbar.code"]">
+                                @Html.Icon("code", size: 17)
+                            </button>
+                        </div>
+
+                        <div class="editor-toolgroup">
+                            <button type="button" class="editor-tool" data-cmd="createLink" title="@L["editor.toolbar.link"]" aria-label="@L["editor.toolbar.link"]">
+                                @Html.Icon("link", size: 17)
+                            </button>
+                            <button type="button" class="editor-tool" data-action="image" title="@L["editor.toolbar.image"]" aria-label="@L["editor.toolbar.image"]">
+                                @Html.Icon("image", size: 17)
+                            </button>
+                            <button type="button" class="editor-tool" data-cmd="removeFormat" title="@L["editor.toolbar.clear"]" aria-label="@L["editor.toolbar.clear"]">
+                                @Html.Icon("clear-format", size: 17)
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="editor-surface" contenteditable="true" role="textbox" aria-multiline="true"
+                         aria-label="@L["editor.contentLabel"]" data-editor-surface
+                         data-placeholder="@L["editor.contentPlaceholder"]"></div>
+                    <template data-editor-initial>@Html.Raw(initialContent)</template>
+                    <input type="file" accept=".jpg,.jpeg,.png,.gif,.webp" hidden data-editor-image-input />
+                </div>
+
+                <textarea asp-for="Content" class="form-control editor-textarea" rows="16" data-editor-fallback>@Model.Content</textarea>
+                <span asp-validation-for="Content" class="field-error"></span>
+                <div class="editor-status">
+                    <span data-editor-count>0</span>
+                    <span class="editor-status-hint">@L["editor.minChars"]</span>
+                </div>
+            </div>
+        </div>
+
+        <aside class="editor-aside">
+            <div class="aside-card">
+                <h2>@L["editor.coverLabel"]</h2>
+                <div class="cover-uploader @(coverUrl is not null ? "has-image" : "")" data-cover-uploader data-has-existing="@(coverUrl is not null ? "true" : "false")">
+                    <input asp-for="Cover" type="file" accept=".jpg,.jpeg,.png,.gif,.webp" hidden data-cover-input />
+                    <div class="cover-preview" data-cover-preview>
+                        @if (coverUrl is not null)
+                        {
+                            <img src="@coverUrl" alt="@Model.Title" data-cover-image />
+                        }
+                        <span class="cover-placeholder" data-cover-placeholder>
+                            @Html.Icon("image", size: 26)
+                            <span>@L["editor.coverChoose"]</span>
+                        </span>
+                    </div>
+                    <div class="cover-actions">
+                        <button type="button" class="btn btn-ghost btn-sm" data-cover-trigger>
+                            @Html.Icon("upload", size: 15) @L["editor.coverChoose"]
+                        </button>
+                        <button type="button" class="btn btn-ghost btn-sm btn-danger-ghost" data-cover-remove
+                                hidden="@(coverUrl is null)">
+                            @L["editor.coverRemove"]
+                        </button>
+                    </div>
+                    <p class="form-hint">@L["editor.coverHint"]</p>
+                    <span asp-validation-for="Cover" class="field-error"></span>
+                </div>
+            </div>
+
+            <div class="aside-card">
+                <h2>@L["editor.guidelinesTitle"]</h2>
+                <ul class="check-list">
+                    <li>@L["editor.guideline1"]</li>
+                    <li>@L["editor.guideline2"]</li>
+                    <li>@L["editor.guideline3"]</li>
+                    <li>@L["editor.guideline4"]</li>
+                </ul>
+            </div>
+
+            <div class="editor-publish">
+                <button type="submit" class="btn btn-primary w-100">
+                    @Html.Icon("check", size: 17)
+                    @(Model.IsEdit ? L["editor.saveChanges"] : L["editor.publish"])
+                </button>
+                <a class="btn btn-ghost w-100"
+                   asp-controller="BlogPost" asp-action="@(Model.IsEdit ? "Details" : "Index")"
+                   asp-route-id="@(Model.IsEdit ? Model.Id : (int?)null)">
+                    @L["common.cancel"]
+                </a>
+            </div>
+        </aside>
+    </div>
+</form>

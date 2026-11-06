@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Bayan">
+  <rect width="64" height="64" rx="14" fill="#0e5a4f"/>
+  <path d="M32 19.5c-4.4-3-10.1-4.1-16-3.7a1.6 1.6 0 0 0-1.5 1.6v26.2c0 1 .9 1.7 1.9 1.6 5.4-.4 10.5.7 14.4 3.3.7.5 1.7.5 2.4 0 3.9-2.6 9-3.7 14.4-3.3 1 .1 1.9-.7 1.9-1.6V17.4a1.6 1.6 0 0 0-1.5-1.6c-5.9-.4-11.6.7-16 3.7Z" fill="#f6f4ee"/>
+  <path d="M32 19.5v28.6" stroke="#0e5a4f" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M23 25.5c2.5-.1 4.9.3 6.9 1.1M23 31c2.5-.1 4.9.3 6.9 1.1M23 36.5c2.5-.1 4.9.3 6.9 1.1" stroke="#0e5a4f" stroke-width="1.8" stroke-linecap="round" opacity=".55"/>
+  <path d="M41 25.5c-2.5-.1-4.9.3-6.9 1.1M41 31c-2.5-.1-4.9.3-6.9 1.1M41 36.5c-2.5-.1-4.9.3-6.9 1.1" stroke="#0e5a4f" stroke-width="1.8" stroke-linecap="round" opacity=".55"/>
+</svg>

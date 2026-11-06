@@ -1,0 +1,46 @@
+﻿@{
+    ViewData["Title"] = L["privacy.title"];
+    ViewData["Description"] = L["privacy.intro"];
+}
+<section class="page-header">
+    <div class="container narrow-container">
+        <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+            <a asp-controller="Home" asp-action="Index">@L["nav.home"]</a>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">@L["privacy.title"]</span>
+        </nav>
+
+        <span class="eyebrow">@L["common.privacy"]</span>
+        <h1>@L["privacy.title"]</h1>
+        <p class="page-header-lead">@L["privacy.intro"]</p>
+        <p class="privacy-updated">@L["privacy.updated"]</p>
+    </div>
+</section>
+
+<section class="page-section">
+    <div class="container narrow-container">
+        <div class="prose-card">
+            <section>
+                <h2>@L["privacy.section1Title"]</h2>
+                <p>@L["privacy.section1Text"]</p>
+            </section>
+            <section>
+                <h2>@L["privacy.section2Title"]</h2>
+                <p>@L["privacy.section2Text"]</p>
+            </section>
+            <section>
+                <h2>@L["privacy.section3Title"]</h2>
+                <p>@L["privacy.section3Text"]</p>
+            </section>
+            <section>
+                <h2>@L["privacy.contactTitle"]</h2>
+                <p>@L["privacy.contactText"]</p>
+            </section>
+
+            <div class="prose-actions">
+                <a class="btn btn-primary" asp-controller="Home" asp-action="Index">@L["error.home"]</a>
+                <a class="btn btn-ghost" asp-controller="BlogPost" asp-action="Index">@L["nav.articles"]</a>
+            </div>
+        </div>
+    </div>
+</section>

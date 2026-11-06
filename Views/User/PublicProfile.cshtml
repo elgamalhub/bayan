@@ -1,0 +1,147 @@
+﻿@model PublicProfileViewModel
+@{
+    ViewData["Title"] = Model.DisplayName;
+    ViewData["Description"] = string.IsNullOrWhiteSpace(Model.Bio) ? L["profile.noBio"] : Model.Bio;
+}
+<section class="profile-hero">
+    <div class="container">
+        <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+            <a asp-controller="Home" asp-action="Index">@L["nav.home"]</a>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">@Model.DisplayName</span>
+        </nav>
+
+        <div class="profile-hero-card">
+            <div class="profile-hero-main">
+                <div class="profile-photo profile-photo-hero @(string.IsNullOrWhiteSpace(Model.ProfileImageUrl) ? "" : "has-image")">
+                    <img src="@Model.ProfileImageUrl" alt="@Model.DisplayName" hidden="@(string.IsNullOrWhiteSpace(Model.ProfileImageUrl))" />
+                    <span class="avatar avatar-xl avatar-initials">@Model.Initials</span>
+                </div>
+
+                <div class="profile-identity">
+                    <span class="eyebrow">@(Model.IsOwner ? L["profile.title"] : L["common.member"])</span>
+                    <h1>@Model.DisplayName</h1>
+                    <div class="profile-meta">
+                        <span class="profile-handle">@@@Model.Username</span>
+                        <span class="dot"></span>
+                        <span>@L.Format("profile.memberSince", L.Date(Model.JoinDate))</span>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Bio))
+                    {
+                        <p class="profile-bio">@Model.Bio</p>
+                    }
+                    else
+                    {
+                        <p class="profile-bio muted">@L["profile.noBio"]</p>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(Model.WebsiteUrl) || !string.IsNullOrWhiteSpace(Model.LinkedInUrl))
+                    {
+                        <div class="profile-links">
+                            @if (!string.IsNullOrWhiteSpace(Model.WebsiteUrl))
+                            {
+                                <a class="chip" href="@Model.WebsiteUrl" target="_blank" rel="noopener noreferrer nofollow">
+                                    @Html.Icon("globe", size: 15)
+                                    @L["profile.website"]
+                                </a>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(Model.LinkedInUrl))
+                            {
+                                <a class="chip" href="@Model.LinkedInUrl" target="_blank" rel="noopener noreferrer nofollow">
+                                    @Html.Icon("linkedin", size: 15)
+                                    @L["profile.linkedin"]
+                                </a>
+                            }
+                        </div>
+                    }
+                </div>
+
+                <div class="profile-hero-actions">
+                    @if (Model.IsOwner)
+                    {
+                        <a class="btn btn-primary" asp-controller="BlogPost" asp-action="Create">
+                            @Html.Icon("pen", size: 16)
+                            @L["profile.writePost"]
+                        </a>
+                        <a class="btn btn-ghost" asp-controller="User" asp-action="EditProfile">
+                            @Html.Icon("settings", size: 16)
+                            @L["profile.editProfile"]
+                        </a>
+                    }
+                    else
+                    {
+                        <a class="btn btn-ghost" asp-controller="BlogPost" asp-action="Index">
+                            @Html.Icon("book-open", size: 16)
+                            @L["nav.articles"]
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <dl class="profile-stats">
+                <div>
+                    <dt>@L.Number(Model.Posts.Count)</dt>
+                    <dd>@L["profile.statsPosts"]</dd>
+                </div>
+                <div>
+                    <dt>@L.Number(Model.LikeCount)</dt>
+                    <dd>@L["profile.statsLikes"]</dd>
+                </div>
+                <div>
+                    <dt>@L.Number(Model.CommentCount)</dt>
+                    <dd>@L["profile.statsComments"]</dd>
+                </div>
+                <div>
+                    <dt>@L.Date(Model.JoinDate)</dt>
+                    <dd>@L["common.member"]</dd>
+                </div>
+            </dl>
+        </div>
+    </div>
+</section>
+
+<section class="page-section">
+    <div class="container">
+        <div class="section-heading">
+            <div>
+                <span class="eyebrow">@L["post.authorPosts"]</span>
+                <h2>@L.Format("profile.postsBy", Model.DisplayName)</h2>
+                <p>@L.Format("blog.results", Model.Posts.Count)</p>
+            </div>
+            @if (Model.IsOwner)
+            {
+                <a class="text-link" asp-controller="BlogPost" asp-action="MyPosts">
+                    @L["nav.myPosts"] @Html.Icon("arrow-right", size: 16)
+                </a>
+            }
+        </div>
+
+        @if (Model.Posts.Count > 0)
+        {
+            <div class="post-grid">
+                @foreach (var post in Model.Posts)
+                {
+                    <partial name="_PostCard" model="post" />
+                }
+            </div>
+        }
+        else
+        {
+            <div class="state-panel">
+                <div class="state-icon">@Html.Icon("book-open", size: 30)</div>
+                <h2>@L["profile.noPosts"]</h2>
+                <p>@L["my.emptyText"]</p>
+                @if (Model.IsOwner)
+                {
+                    <div class="state-actions">
+                        <a class="btn btn-primary" asp-controller="BlogPost" asp-action="Create">
+                            @Html.Icon("pen", size: 17)
+                            @L["my.write"]
+                        </a>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</section>

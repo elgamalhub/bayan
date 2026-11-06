@@ -1,0 +1,48 @@
+# Build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Oo]bj/
+[Bb]in/
+
+# Visual Studio / Rider
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.rsuser
+
+# Test results
+[Tt]est[Rr]esult*/
+*.trx
+coverage*/
+
+# NuGet
+*.nupkg
+*.snupkg
+packages/
+!packages/build/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# Local secrets and environment overrides
+appsettings.Development.local.json
+.env
+.env.*
+!.env.example
+
+# Temporary uploads (keep existing demo images that are already committed)
+# Add new uploads explicitly or use a storage service in production.

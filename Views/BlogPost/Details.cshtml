@@ -1,0 +1,287 @@
+﻿@model PostDetailsViewModel
+@using Microsoft.AspNetCore.Identity
+@inject IImageService Images
+@inject UserManager<ApplicationUser> UserManager
+@{
+    var post = Model.Post;
+    var author = post.User;
+    var authorAvatar = Images.Url("UserImages", author?.ProfileImagePath);
+    var cover = Images.Url("PostImages", post.ImageUrl);
+    var currentUserId = UserManager.GetUserId(User);
+    var canManagePost = Model.CanManage || User.IsInRole("Admin");
+    var isAuthenticated = User.Identity?.IsAuthenticated == true;
+    var commentCount = post.Comments.Count;
+    var shareUrl = $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}";
+}
+<article class="article">
+    <header class="article-header">
+        <div class="container article-container">
+            <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+                <a asp-controller="Home" asp-action="Index">@L["nav.home"]</a>
+                <span aria-hidden="true">/</span>
+                <a asp-controller="BlogPost" asp-action="Index">@L["nav.articles"]</a>
+                @if (post.Category is not null)
+                {
+                    <span aria-hidden="true">/</span>
+                    <a asp-controller="BlogPost" asp-action="Index" asp-route-category="@post.CategoryId">@post.Category.Name</a>
+                }
+            </nav>
+
+            <div class="article-kicker">
+                @if (post.Category is not null)
+                {
+                    <a class="chip chip-accent" asp-controller="BlogPost" asp-action="Index" asp-route-category="@post.CategoryId">@post.Category.Name</a>
+                }
+                <span class="post-read">
+                    @Html.Icon("clock", size: 15)
+                    <span>@L.Format("post.minRead", ArticleContent.ReadMinutes(post.Content))</span>
+                </span>
+            </div>
+
+            <h1 class="article-title">@post.Title</h1>
+
+            <div class="article-byline">
+                <a class="byline-author" asp-controller="User" asp-action="PublicProfile" asp-route-userName="@author?.UserName">
+                    @Html.Avatar(authorAvatar, author?.Initials ?? "B", author?.DisplayName ?? "Bayan", "avatar-sm")
+                    <span>
+                        <span class="byline-name">@(author?.DisplayName ?? "Bayan")</span>
+                        <span class="byline-date">
+                            @L.Format("post.published", L.Date(post.CreatedAt))
+                            @if (post.UpdatedAt.HasValue)
+                            {
+                                <text> · @L["post.edited"]</text>
+                            }
+                        </span>
+                    </span>
+                </a>
+
+                @if (canManagePost)
+                {
+                    <div class="article-admin-actions">
+                        <a class="btn btn-ghost btn-sm" asp-controller="BlogPost" asp-action="Edit" asp-route-id="@post.Id">
+                            @Html.Icon("pen", size: 15) @L["common.edit"]
+                        </a>
+                        <a class="btn btn-ghost btn-sm btn-danger-ghost" asp-controller="BlogPost" asp-action="Delete" asp-route-id="@post.Id">
+                            @Html.Icon("trash", size: 15) @L["common.delete"]
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+    </header>
+
+    @if (!string.IsNullOrWhiteSpace(cover))
+    {
+        <figure class="article-cover">
+            <div class="container article-container">
+                <img src="@cover" alt="@post.Title" />
+            </div>
+        </figure>
+    }
+
+    <div class="container article-container article-body-wrap">
+        <div class="article-body">
+            @Html.Raw(ArticleContent.Render(post.Content))
+        </div>
+
+        <div class="article-actions">
+            @if (isAuthenticated)
+            {
+                <button type="button"
+                        class="btn btn-like @(post.IsLikedByCurrentUser ? "is-liked" : "")"
+                        data-like-button data-post-id="@post.Id" data-liked="@(post.IsLikedByCurrentUser ? "true" : "false")"
+                        aria-pressed="@(post.IsLikedByCurrentUser ? "true" : "false")">
+                    <span class="like-icon">@Html.Icon(post.IsLikedByCurrentUser ? "heart-filled" : "heart", size: 19)</span>
+                    <span class="like-label">@L[post.IsLikedByCurrentUser ? "post.liked" : "post.like"]</span>
+                    <span class="like-count">@Model.LikeCount</span>
+                </button>
+            }
+            else
+            {
+                <a class="btn btn-like" asp-controller="User" asp-action="Login"
+                   asp-route-returnUrl="@($"{Context.Request.Path}")">
+                    <span class="like-icon">@Html.Icon("heart", size: 19)</span>
+                    <span class="like-label">@L["post.like"]</span>
+                    <span class="like-count">@Model.LikeCount</span>
+                </a>
+            }
+
+            <button type="button" class="btn btn-ghost" data-copy-link data-copy-value="@shareUrl">
+                @Html.Icon("link", size: 17) @L["common.copyLink"]
+            </button>
+
+            <a class="btn btn-ghost" asp-controller="BlogPost" asp-action="Index">
+                @Html.Icon("arrow-left", size: 17) @L["nav.articles"]
+            </a>
+        </div>
+
+        <section class="author-card">
+            @Html.Avatar(authorAvatar, author?.Initials ?? "B", author?.DisplayName ?? "Bayan", "avatar-lg")
+            <div class="author-card-body">
+                <span class="eyebrow">@L["post.authorAbout"]</span>
+                <h2>
+                    <a asp-controller="User" asp-action="PublicProfile" asp-route-userName="@author?.UserName">
+                        @(author?.DisplayName ?? "Bayan")
+                    </a>
+                </h2>
+                @if (!string.IsNullOrWhiteSpace(author?.Bio))
+                {
+                    <p>@author.Bio</p>
+                }
+                else
+                {
+                    <p class="muted">@L["post.authorPosts"]</p>
+                }
+                <div class="author-card-meta">
+                    @if (author is not null)
+                    {
+                        <span>@L.Format("profile.memberSince", L.Date(author.CreatedDate))</span>
+                    }
+                    @if (author is not null)
+                    {
+                        <a class="text-link" asp-controller="User" asp-action="PublicProfile" asp-route-userName="@author.UserName">
+                            @L["profile.viewProfile"] @Html.Icon("arrow-right", size: 15)
+                        </a>
+                    }
+                </div>
+            </div>
+        </section>
+
+        <section class="comments" id="comments">
+            <div class="comments-heading">
+                <div>
+                    <h2>@L["post.commentsTitle"] <span class="count-pill">@commentCount</span></h2>
+                    <p>@L["post.commentsSubtitle"]</p>
+                </div>
+            </div>
+
+            @if (commentCount == 0)
+            {
+                <div class="empty-comments">
+                    @Html.Icon("message", size: 22)
+                    <p>@L["post.noComments"]</p>
+                </div>
+            }
+            else
+            {
+                <ol class="comment-list">
+                    @foreach (var comment in post.Comments)
+                    {
+                        var commentAuthor = comment.User;
+                        var commentAvatar = Images.Url("UserImages", commentAuthor?.ProfileImagePath);
+                        var commentInitials = commentAuthor?.Initials
+                            ?? (string.IsNullOrWhiteSpace(comment.Author) ? "?" : comment.Author[..1].ToUpperInvariant());
+                        var canManageComment = isAuthenticated
+                            && (User.IsInRole("Admin")
+                                || (!string.IsNullOrEmpty(comment.UserId) && comment.UserId == currentUserId)
+                                || (string.IsNullOrEmpty(comment.UserId)
+                                    && string.Equals(comment.Author, User.Identity!.Name, StringComparison.OrdinalIgnoreCase)));
+                        <li class="comment" id="comment-@comment.Id">
+                            @Html.Avatar(commentAvatar, commentInitials, comment.Author, "avatar-sm")
+                            <div class="comment-main">
+                                <div class="comment-meta">
+                                    <span class="comment-author">
+                                        @if (commentAuthor is not null)
+                                        {
+                                            <a asp-controller="User" asp-action="PublicProfile" asp-route-userName="@commentAuthor.UserName">@(commentAuthor.DisplayName)</a>
+                                        }
+                                        else
+                                        {
+                                            @comment.Author
+                                        }
+                                    </span>
+                                    <span class="dot"></span>
+                                    <span class="comment-date">@L.Date(comment.CreatedAt)</span>
+                                </div>
+
+                                <div class="comment-content" id="comment-content-@comment.Id">
+                                    <p class="comment-text">@comment.Content</p>
+                                    @if (canManageComment)
+                                    {
+                                        <div class="comment-actions">
+                                            <button type="button" class="text-button" data-comment-edit="@comment.Id">@L["common.edit"]</button>
+                                            <form asp-controller="Comment" asp-action="Delete" method="post"
+                                                  data-confirm
+                                                  data-confirm-title="@L["comment.deleteTitle"]"
+                                                  data-confirm-text="@L["comment.deleteText"]"
+                                                  data-confirm-accept="@L["comment.deleteConfirm"]"
+                                                  data-confirm-cancel="@L["comment.deleteCancel"]">
+                                                <input type="hidden" name="id" value="@comment.Id" />
+                                                <button type="submit" class="text-button text-danger">@L["common.delete"]</button>
+                                            </form>
+                                        </div>
+                                    }
+                                </div>
+
+                                @if (canManageComment)
+                                {
+                                    <form class="comment-edit-form" id="comment-edit-@comment.Id" hidden
+                                          asp-controller="Comment" asp-action="Edit" method="post">
+                                        <input type="hidden" name="id" value="@comment.Id" />
+                                        <input type="hidden" name="blogPostId" value="@post.Id" />
+                                        <label class="visually-hidden" for="comment-edit-input-@comment.Id">@L["common.edit"]</label>
+                                        <textarea id="comment-edit-input-@comment.Id" name="content" rows="3" maxlength="1000" required>@comment.Content</textarea>
+                                        <div class="comment-edit-actions">
+                                            <button type="button" class="btn btn-ghost btn-sm" data-comment-cancel="@comment.Id">@L["common.cancel"]</button>
+                                            <button type="submit" class="btn btn-primary btn-sm">@L["common.save"]</button>
+                                        </div>
+                                    </form>
+                                }
+                            </div>
+                        </li>
+                    }
+                </ol>
+            }
+
+            @if (isAuthenticated)
+            {
+                <form class="comment-form" asp-controller="Comment" asp-action="Add" method="post">
+                    <input type="hidden" name="BlogPostId" value="@post.Id" />
+                    <div class="form-field">
+                        <label for="commentContent">@L["post.leaveComment"]</label>
+                        <textarea id="commentContent" name="Content" rows="4" maxlength="1000" required
+                                  placeholder="@L["post.commentPlaceholder"]"></textarea>
+                        <span class="form-hint" data-char-counter-for="commentContent">0 / 1000</span>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        @Html.Icon("message", size: 17) @L["post.postComment"]
+                    </button>
+                </form>
+            }
+            else
+            {
+                <div class="comment-login-panel">
+                    <p>
+                        <a asp-controller="User" asp-action="Login" asp-route-returnUrl="@Context.Request.Path">@L["post.loginToComment"]</a>
+                        @L["post.loginToCommentText"]
+                    </p>
+                </div>
+            }
+        </section>
+    </div>
+</article>
+
+@if (Model.Related.Any())
+{
+    <section class="page-section section-tinted">
+        <div class="container">
+            <div class="section-heading compact">
+                <div>
+                    <span class="eyebrow">@L["post.related"]</span>
+                    <h2>@L["post.related"]</h2>
+                    <p>@L["post.relatedSubtitle"]</p>
+                </div>
+                <a class="text-link" asp-controller="BlogPost" asp-action="Index" asp-route-category="@post.CategoryId">
+                    @L["common.viewAll"] @Html.Icon("arrow-right", size: 16)
+                </a>
+            </div>
+
+            <div class="post-grid">
+                @foreach (var related in Model.Related)
+                {
+                    <partial name="_PostCard" model="related" />
+                }
+            </div>
+        </div>
+    </section>
+}

@@ -1,0 +1,225 @@
+﻿@model BlogIndexViewModel
+@{
+    ViewData["Title"] = Model.ActiveCategoryName ?? L["blog.title"];
+    ViewData["Description"] = L["blog.subtitle"];
+    var start = Math.Max(1, Model.Page - 2);
+    var end = Math.Min(Model.TotalPages, Model.Page + 2);
+    var resultLabel = Model.TotalCount == 1 ? L["blog.resultOne"] : L.Format("blog.results", Model.TotalCount);
+}
+<section class="page-header">
+    <div class="container">
+        <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+            <a asp-controller="Home" asp-action="Index">@L["nav.home"]</a>
+            <span aria-hidden="true">/</span>
+            <a asp-controller="BlogPost" asp-action="Index">@L["nav.articles"]</a>
+            @if (!string.IsNullOrWhiteSpace(Model.ActiveCategoryName))
+            {
+                <span aria-hidden="true">/</span>
+                <span aria-current="page">@Model.ActiveCategoryName</span>
+            }
+        </nav>
+
+        <div class="page-header-row">
+            <div>
+                <span class="eyebrow">@L["home.latestEyebrow"]</span>
+                <h1>@(Model.ActiveCategoryName ?? L["blog.title"])</h1>
+                <p>@L["blog.subtitle"]</p>
+            </div>
+            <span class="result-count">@resultLabel</span>
+        </div>
+    </div>
+</section>
+
+<section class="page-section">
+    <div class="container">
+        <div class="filter-panel">
+            <form class="filter-form" method="get" asp-controller="BlogPost" asp-action="Index" role="search">
+                @if (Model.CategoryId.HasValue)
+                {
+                    <input type="hidden" name="category" value="@Model.CategoryId" />
+                }
+                <div class="filter-search">
+                    <label class="visually-hidden" for="articleSearch">@L["blog.searchLabel"]</label>
+                    <span class="filter-search-icon">@Html.Icon("search", size: 18)</span>
+                    <input id="articleSearch" name="search" type="search" value="@Model.Search"
+                           placeholder="@L["blog.searchPlaceholder"]" autocomplete="off" />
+                    <button type="submit" class="btn btn-primary btn-sm">@L["common.search"]</button>
+                </div>
+
+                <div class="filter-sort">
+                    <label for="sortSelect">@L["blog.filter"]</label>
+                    <select id="sortSelect" name="sort" class="form-select form-select-sm" onchange="this.form.submit()">
+                        <option value="newest" selected="@(Model.Sort == "newest")">@L["blog.sortNewest"]</option>
+                        <option value="oldest" selected="@(Model.Sort == "oldest")">@L["blog.sortOldest"]</option>
+                        <option value="liked" selected="@(Model.Sort == "liked")">@L["blog.sortLiked"]</option>
+                    </select>
+                </div>
+
+                @if (Model.HasFilters)
+                {
+                    <a class="btn btn-ghost btn-sm" asp-controller="BlogPost" asp-action="Index" asp-route-sort="@Model.Sort">
+                        @Html.Icon("x", size: 15) @L["blog.clearFilters"]
+                    </a>
+                }
+            </form>
+
+            <div class="category-chips" role="group" aria-label="@L["blog.categories"]">
+                <a class="chip @(Model.CategoryId is null ? "chip-active" : "")"
+                   asp-controller="BlogPost" asp-action="Index" asp-route-search="@Model.Search" asp-route-sort="@Model.Sort">
+                    @L["blog.allCategories"]
+                </a>
+                @foreach (var item in Model.Categories)
+                {
+                    <a class="chip @(Model.CategoryId == item.Category.Id ? "chip-active" : "")"
+                       asp-controller="BlogPost" asp-action="Index"
+                       asp-route-category="@item.Category.Id" asp-route-search="@Model.Search" asp-route-sort="@Model.Sort">
+                        @item.Category.Name
+                        <span class="chip-count">@item.PostCount</span>
+                    </a>
+                }
+            </div>
+        </div>
+
+        <div class="blog-layout">
+            <div class="blog-main">
+                @if (Model.Posts.Any())
+                {
+                    <div class="post-grid">
+                        @foreach (var post in Model.Posts)
+                        {
+                            <partial name="_PostCard" model="post" />
+                        }
+                    </div>
+
+                    @if (Model.TotalPages > 1)
+                    {
+                        <nav class="pagination" aria-label="@L["common.page"]">
+                            @if (Model.HasPrevious)
+                            {
+                                <a class="page-btn" asp-controller="BlogPost" asp-action="Index"
+                                   asp-route-page="@(Model.Page - 1)" asp-route-category="@Model.CategoryId"
+                                   asp-route-search="@Model.Search" asp-route-sort="@Model.Sort"
+                                   aria-label="@L["common.previous"]">
+                                    @Html.Icon("chevron-left", size: 17)
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="page-btn disabled">@Html.Icon("chevron-left", size: 17)</span>
+                            }
+
+                            @if (start > 1)
+                            {
+                                <a class="page-btn" asp-controller="BlogPost" asp-action="Index"
+                                   asp-route-page="1" asp-route-category="@Model.CategoryId"
+                                   asp-route-search="@Model.Search" asp-route-sort="@Model.Sort">1</a>
+                                @if (start > 2)
+                                {
+                                    <span class="page-ellipsis">…</span>
+                                }
+                            }
+
+                            @for (var i = start; i <= end; i++)
+                            {
+                                <a class="page-btn @(i == Model.Page ? "active" : "")"
+                                   asp-controller="BlogPost" asp-action="Index"
+                                   asp-route-page="@i" asp-route-category="@Model.CategoryId"
+                                   asp-route-search="@Model.Search" asp-route-sort="@Model.Sort">@i</a>
+                            }
+
+                            @if (end < Model.TotalPages)
+                            {
+                                @if (end < Model.TotalPages - 1)
+                                {
+                                    <span class="page-ellipsis">…</span>
+                                }
+                                <a class="page-btn" asp-controller="BlogPost" asp-action="Index"
+                                   asp-route-page="@Model.TotalPages" asp-route-category="@Model.CategoryId"
+                                   asp-route-search="@Model.Search" asp-route-sort="@Model.Sort">@Model.TotalPages</a>
+                            }
+
+                            @if (Model.HasNext)
+                            {
+                                <a class="page-btn" asp-controller="BlogPost" asp-action="Index"
+                                   asp-route-page="@(Model.Page + 1)" asp-route-category="@Model.CategoryId"
+                                   asp-route-search="@Model.Search" asp-route-sort="@Model.Sort"
+                                   aria-label="@L["common.next"]">
+                                    @Html.Icon("chevron-right", size: 17)
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="page-btn disabled">@Html.Icon("chevron-right", size: 17)</span>
+                            }
+                        </nav>
+                    }
+                }
+                else
+                {
+                    <div class="state-panel">
+                        <div class="state-icon">@Html.Icon("search", size: 30)</div>
+                        <h2>@L["blog.noResults"]</h2>
+                        <p>@L["blog.noResultsText"]</p>
+                        <div class="state-actions">
+                            <a class="btn btn-primary" asp-controller="BlogPost" asp-action="Index">@L["blog.clearFilters"]</a>
+                            <a class="btn btn-ghost" asp-controller="Home" asp-action="Index">@L["nav.home"]</a>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <aside class="blog-sidebar">
+                <div class="aside-card" id="topics">
+                    <div class="aside-heading">
+                        <h2>@L["blog.categories"]</h2>
+                    </div>
+                    <ul class="topic-list">
+                        @foreach (var item in Model.Categories)
+                        {
+                            <li>
+                                <a class="@(Model.CategoryId == item.Category.Id ? "active" : "")"
+                                   asp-controller="BlogPost" asp-action="Index"
+                                   asp-route-category="@item.Category.Id" asp-route-search="@Model.Search" asp-route-sort="@Model.Sort">
+                                    <span>@item.Category.Name</span>
+                                    <span class="topic-count">@item.PostCount</span>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+                @if (Model.Popular.Any())
+                {
+                    <div class="aside-card">
+                        <div class="aside-heading">
+                            <h2>@L["blog.popular"]</h2>
+                        </div>
+                        <ol class="popular-list compact">
+                            @foreach (var post in Model.Popular)
+                            {
+                                <li>
+                                    <span class="popular-rank">@(Model.Popular.IndexOf(post) + 1)</span>
+                                    <div class="popular-body">
+                                        <a asp-controller="BlogPost" asp-action="Details" asp-route-id="@post.Id">@post.Title</a>
+                                        <span class="popular-meta">
+                                            <span>@L.Date(post.CreatedAt)</span>
+                                            <span class="dot"></span>
+                                            <span>@post.Likes.Count @L["post.like"]</span>
+                                        </span>
+                                    </div>
+                                </li>
+                            }
+                        </ol>
+                    </div>
+                }
+
+                <div class="aside-card aside-cta">
+                    <span class="aside-cta-icon">@Html.Icon("pen", size: 22)</span>
+                    <h2>@L["blog.writeCtaTitle"]</h2>
+                    <p>@L["blog.writeCtaText"]</p>
+                    <a class="btn btn-primary btn-sm" asp-controller="BlogPost" asp-action="Create">@L["blog.writeCtaButton"]</a>
+                </div>
+            </aside>
+        </div>
+    </div>
+</section>

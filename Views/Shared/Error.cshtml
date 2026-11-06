@@ -1,0 +1,20 @@
+﻿@model ErrorViewModel
+@{
+    ViewData["Title"] = L["error.title"];
+}
+<section class="page-section">
+    <div class="container narrow-container">
+        <div class="state-panel">
+            <div class="state-icon">@Html.Icon("alert", size: 30)</div>
+            <h1>@L["error.title"]</h1>
+            <p>@L["error.text"]</p>
+            @if (Model.ShowRequestId)
+            {
+                <p class="state-meta">@L["error.requestId"]: <code>@Model.RequestId</code></p>
+            }
+            <div class="state-actions">
+                <a class="btn btn-primary" asp-controller="Home" asp-action="Index">@L["error.home"]</a>
+            </div>
+        </div>
+    </div>
+</section>

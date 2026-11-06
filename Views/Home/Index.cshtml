@@ -1,0 +1,264 @@
+﻿@model HomeViewModel
+@inject IImageService Images
+@{
+    var heroCover = Images.Url("PostImages", Model.Featured?.ImageUrl);
+    var heroAuthor = Model.Featured?.User;
+    var heroAvatar = Images.Url("UserImages", heroAuthor?.ProfileImagePath);
+    var hasPosts = Model.PostCount > 0;
+}
+
+<section class="hero">
+    <div class="container hero-grid">
+        <div class="hero-copy">
+            <span class="eyebrow">@L["home.eyebrow"]</span>
+            <h1 class="hero-title">
+                @L["home.title1"]
+                <span class="hero-accent">@L["home.titleAccent"]</span>
+                <span class="hero-title-line">@L["home.title2"]</span>
+            </h1>
+            <p class="hero-subtitle">@L["home.subtitle"]</p>
+
+            <form class="hero-search" asp-controller="BlogPost" asp-action="Index" method="get" role="search">
+                <label class="visually-hidden" for="heroSearch">@L["blog.searchLabel"]</label>
+                <span class="hero-search-icon">@Html.Icon("search", size: 19)</span>
+                <input id="heroSearch" name="search" type="search" placeholder="@L["home.searchPlaceholder"]" />
+                <button type="submit" class="btn btn-primary">@L["common.search"]</button>
+            </form>
+
+            <div class="hero-actions">
+                <a class="btn btn-primary btn-lg" asp-controller="BlogPost" asp-action="Index">
+                    @L["home.cta"] @Html.Icon("arrow-right", size: 18)
+                </a>
+                <a class="btn btn-ghost btn-lg" asp-controller="BlogPost" asp-action="Create">
+                    @Html.Icon("pen", size: 18) @L["home.ctaSecondary"]
+                </a>
+            </div>
+
+            <dl class="hero-stats">
+                <div>
+                    <dt>@L.Number(Model.PostCount)</dt>
+                    <dd>@L["home.statArticles"]</dd>
+                </div>
+                <div>
+                    <dt>@L.Number(Model.WriterCount)</dt>
+                    <dd>@L["home.statWriters"]</dd>
+                </div>
+                <div>
+                    <dt>@L.Number(Model.CategoryCount)</dt>
+                    <dd>@L["home.statCategories"]</dd>
+                </div>
+            </dl>
+        </div>
+
+        <div class="hero-visual">
+            @if (Model.Featured is not null)
+            {
+                <article class="hero-feature">
+                    <a class="hero-feature-cover" asp-controller="BlogPost" asp-action="Details" asp-route-id="@Model.Featured.Id">
+                        @if (!string.IsNullOrWhiteSpace(heroCover))
+                        {
+                            <img src="@heroCover" alt="@Model.Featured.Title" />
+                        }
+                        else
+                        {
+                            <span class="hero-feature-placeholder">
+                                @Html.Icon("book-open", size: 40)
+                            </span>
+                        }
+                        <span class="hero-feature-label">@L["home.featured"]</span>
+                    </a>
+                    <div class="hero-feature-body">
+                        @if (Model.Featured.Category is not null)
+                        {
+                            <span class="chip chip-muted">@Model.Featured.Category.Name</span>
+                        }
+                        <h2>
+                            <a asp-controller="BlogPost" asp-action="Details" asp-route-id="@Model.Featured.Id">@Model.Featured.Title</a>
+                        </h2>
+                        <p>@ArticleContent.Excerpt(Model.Featured.Content, 130)</p>
+                        <div class="hero-feature-meta">
+                            @Html.Avatar(heroAvatar, heroAuthor?.Initials ?? "B", heroAuthor?.DisplayName ?? "Bayan", "avatar-xs")
+                            <span>@(heroAuthor?.DisplayName ?? "Bayan")</span>
+                            <span class="dot"></span>
+                            <span>@L.Format("post.minRead", ArticleContent.ReadMinutes(Model.Featured.Content))</span>
+                        </div>
+                    </div>
+                </article>
+                <div class="hero-orbit hero-orbit-one" aria-hidden="true"></div>
+                <div class="hero-orbit hero-orbit-two" aria-hidden="true"></div>
+            }
+            else
+            {
+                <div class="hero-empty-visual">
+                    <span class="hero-empty-mark">@Html.Icon("logo", size: 64)</span>
+                    <p>@L["home.empty"]</p>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+@if (hasPosts)
+{
+    <section class="page-section">
+        <div class="container">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">@L["home.latestEyebrow"]</span>
+                    <h2>@L["home.latestTitle"]</h2>
+                    <p>@L["home.latestSubtitle"]</p>
+                </div>
+                <a class="text-link" asp-controller="BlogPost" asp-action="Index">
+                    @L["common.viewAll"] @Html.Icon("arrow-right", size: 16)
+                </a>
+            </div>
+
+            <div class="post-grid">
+                @if (Model.Latest.Any())
+                {
+                    foreach (var post in Model.Latest)
+                    {
+                        <partial name="_PostCard" model="post" />
+                    }
+                }
+                else if (Model.Featured is not null)
+                {
+                    <partial name="_PostCard" model="Model.Featured" />
+                }
+            </div>
+        </div>
+    </section>
+
+    <section class="page-section section-tinted">
+        <div class="container">
+            <div class="split-layout">
+                <div class="split-main">
+                    <div class="section-heading compact">
+                        <div>
+                            <span class="eyebrow">@L["home.popularEyebrow"]</span>
+                            <h2>@L["home.popularTitle"]</h2>
+                        </div>
+                        <a class="text-link" asp-controller="BlogPost" asp-action="Index" asp-route-sort="liked">
+                            @L["common.viewAll"] @Html.Icon("arrow-right", size: 16)
+                        </a>
+                    </div>
+
+                    <ol class="popular-list">
+                        @foreach (var post in Model.Popular)
+                        {
+                            <li>
+                                <span class="popular-rank">@(Model.Popular.IndexOf(post) + 1)</span>
+                                <div class="popular-body">
+                                    <a asp-controller="BlogPost" asp-action="Details" asp-route-id="@post.Id">@post.Title</a>
+                                    <span class="popular-meta">
+                                        @if (post.Category is not null)
+                                        {
+                                            <span>@post.Category.Name</span>
+                                            <span class="dot"></span>
+                                        }
+                                        <span>@L.Date(post.CreatedAt)</span>
+                                    </span>
+                                </div>
+                                <span class="popular-likes">
+                                    @Html.Icon("heart", size: 15)
+                                    <span>@post.Likes.Count</span>
+                                </span>
+                            </li>
+                        }
+                    </ol>
+                </div>
+
+                <aside class="split-aside">
+                    <div class="aside-card">
+                        <h3>@L["home.categoriesEyebrow"]</h3>
+                        <ul class="topic-list">
+                            @foreach (var item in Model.Categories)
+                            {
+                                <li>
+                                    <a asp-controller="BlogPost" asp-action="Index" asp-route-category="@item.Category.Id">
+                                        <span>@item.Category.Name</span>
+                                        <span class="topic-count">@item.PostCount</span>
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </section>
+
+    <section class="page-section" id="topics">
+        <div class="container">
+            <div class="section-heading">
+                <div>
+                    <span class="eyebrow">@L["home.categoriesEyebrow"]</span>
+                    <h2>@L["home.categoriesTitle"]</h2>
+                    <p>@L["home.categoriesSubtitle"]</p>
+                </div>
+            </div>
+
+            <div class="topic-grid">
+                @foreach (var item in Model.Categories)
+                {
+                    <a class="topic-card" asp-controller="BlogPost" asp-action="Index" asp-route-category="@item.Category.Id">
+                        <span class="topic-card-icon">@Html.Icon("grid", size: 22)</span>
+                        <span class="topic-card-name">@item.Category.Name</span>
+                        <span class="topic-card-count">@L.Format("blog.results", item.PostCount)</span>
+                        <span class="topic-card-arrow">@Html.Icon("arrow-right", size: 18)</span>
+                    </a>
+                }
+            </div>
+        </div>
+    </section>
+}
+
+<section class="page-section section-tinted">
+    <div class="container">
+        <div class="section-heading centered">
+            <div>
+                <span class="eyebrow">@L["home.whyEyebrow"]</span>
+                <h2>@L["home.whyTitle"]</h2>
+                <p>@L["home.whySubtitle"]</p>
+            </div>
+        </div>
+
+        <div class="value-grid">
+            <div class="value-card">
+                <span class="value-icon">@Html.Icon("shield", size: 24)</span>
+                <h3>@L["home.why1Title"]</h3>
+                <p>@L["home.why1Text"]</p>
+            </div>
+            <div class="value-card">
+                <span class="value-icon">@Html.Icon("book-open", size: 24)</span>
+                <h3>@L["home.why2Title"]</h3>
+                <p>@L["home.why2Text"]</p>
+            </div>
+            <div class="value-card">
+                <span class="value-icon">@Html.Icon("users", size: 24)</span>
+                <h3>@L["home.why3Title"]</h3>
+                <p>@L["home.why3Text"]</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="page-section">
+    <div class="container">
+        <div class="cta-panel">
+            <div class="cta-copy">
+                <span class="eyebrow">@L["home.ctaEyebrow"]</span>
+                <h2>@L["home.ctaTitle"]</h2>
+                <p>@L["home.ctaText"]</p>
+            </div>
+            <div class="cta-actions">
+                <a class="btn btn-primary btn-lg" asp-controller="BlogPost" asp-action="Create">
+                    @Html.Icon("pen", size: 18) @L["home.ctaButton"]
+                </a>
+                <a class="btn btn-ghost btn-lg" asp-controller="BlogPost" asp-action="Index">
+                    @L["home.cta"]
+                </a>
+            </div>
+        </div>
+    </div>
+</section>

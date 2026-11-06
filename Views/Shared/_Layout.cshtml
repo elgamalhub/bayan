@@ -1,0 +1,342 @@
+﻿@using Microsoft.AspNetCore.Antiforgery
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@inject IAntiforgery Antiforgery
+@inject IImageService Images
+@{
+    var culture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+    var isRtl = culture == "ar";
+    var brand = isRtl ? "بيان" : "Bayan";
+    var title = ViewData["Title"] as string;
+    var pageTitle = string.IsNullOrWhiteSpace(title) ? $"{brand} — {L["nav.brandTagline"]}" : $"{title} · {brand}";
+    var description = ViewData["Description"] as string ?? L["footer.tagline"];
+    var ogImage = ViewData["OgImage"] as string;
+    var ogType = ViewData["OgType"] as string ?? "website";
+    var canonical = $"{Context.Request.Scheme}://{Context.Request.Host}{Context.Request.Path}";
+    var returnUrl = $"{Context.Request.Path}{Context.Request.QueryString}";
+    var currentUser = SignInManager.IsSignedIn(User) ? await UserManager.GetUserAsync(User) : null;
+    var avatarUrl = currentUser is null ? null : Images.Url("UserImages", currentUser.ProfileImagePath);
+    var token = Antiforgery.GetAndStoreTokens(Context).RequestToken;
+    var controller = ViewContext.RouteData.Values["controller"]?.ToString();
+    var action = ViewContext.RouteData.Values["action"]?.ToString();
+    var isHome = controller == "Home" && action == "Index";
+    var success = TempData["Success"] as string;
+    var error = TempData["Error"] as string;
+    var searchValue = Context.Request.Query["search"].ToString();
+}
+<!DOCTYPE html>
+<html lang="@culture" dir="@(isRtl ? "rtl" : "ltr")">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content="@token" />
+    <meta name="theme-color" content="#0f172a" />
+    <title>@pageTitle</title>
+    <meta name="description" content="@description" />
+    <link rel="canonical" href="@canonical" />
+    <meta property="og:site_name" content="@brand" />
+    <meta property="og:type" content="@ogType" />
+    <meta property="og:title" content="@pageTitle" />
+    <meta property="og:description" content="@description" />
+    <meta property="og:url" content="@canonical" />
+    @if (!string.IsNullOrWhiteSpace(ogImage))
+    {
+        <meta property="og:image" content="@($"{Context.Request.Scheme}://{Context.Request.Host}{ogImage}")" />
+    }
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="~/favicon.svg" type="image/svg+xml" />
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem("bayan-theme");
+                var prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+                if (saved === "dark" || (!saved && prefersDark)) {
+                    document.documentElement.setAttribute("data-theme", "dark");
+                }
+            } catch (e) { }
+        })();
+    </script>
+    @if (isRtl)
+    {
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.rtl.min.css" asp-append-version="true" />
+    }
+    else
+    {
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
+    }
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="@(isHome ? "page-home" : "page-inner")"
+      data-authenticated="@(currentUser is not null ? "true" : "false")"
+      data-culture="@culture"
+      data-dir="@(isRtl ? "rtl" : "ltr")">
+    <a class="skip-link" href="#main-content">@L["common.skipToContent"]</a>
+
+    <header class="site-header" id="siteHeader">
+        <div class="container header-inner">
+            <a class="brand" asp-controller="Home" asp-action="Index" aria-label="@brand">
+                <span class="brand-mark">@Html.Icon("logo", size: 28)</span>
+                <span class="brand-text">
+                    <span class="brand-name">@brand</span>
+                    <span class="brand-tagline">@L["nav.brandTagline"]</span>
+                </span>
+            </a>
+
+            <button class="nav-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#siteNav"
+                    aria-controls="siteNav" aria-expanded="false" aria-label="@L["nav.menu"]">
+                <span class="nav-toggle-open">@Html.Icon("menu")</span>
+                <span class="nav-toggle-close">@Html.Icon("x")</span>
+            </button>
+
+            <div class="collapse site-nav" id="siteNav">
+                <nav class="primary-nav" aria-label="@L["nav.home"]">
+                    <a class="nav-link @(isHome ? "active" : "")" asp-controller="Home" asp-action="Index">@L["nav.home"]</a>
+                    <a class="nav-link @(controller == "BlogPost" && action == "Index" ? "active" : "")"
+                       asp-controller="BlogPost" asp-action="Index">@L["nav.articles"]</a>
+                    <a class="nav-link @(controller == "BlogPost" && action == "Index" ? "active" : "")"
+                       asp-controller="BlogPost" asp-action="Index" asp-fragment="topics">@L["nav.categories"]</a>
+                    @if (currentUser is not null)
+                    {
+                        <a class="nav-link @(action == "MyPosts" ? "active" : "")"
+                           asp-controller="BlogPost" asp-action="MyPosts">@L["nav.myPosts"]</a>
+                    }
+                </nav>
+
+                <div class="header-tools">
+                    <form class="nav-search" asp-controller="BlogPost" asp-action="Index" method="get" role="search">
+                        <label class="visually-hidden" for="navSearch">@L["blog.searchLabel"]</label>
+                        <span class="nav-search-icon">@Html.Icon("search", size: 17)</span>
+                        <input id="navSearch" name="search" type="search" value="@searchValue"
+                               placeholder="@L["nav.searchPlaceholder"]" autocomplete="off" />
+                    </form>
+
+                    <div class="tool-group">
+                        <div class="lang-switch" role="group" aria-label="@L["nav.language"]">
+                            <a class="@(culture == "en" ? "active" : "")"
+                               asp-controller="Language" asp-action="Set" asp-route-culture="en" asp-route-returnUrl="@returnUrl"
+                               title="@L["language.english"]">EN</a>
+                            <a class="@(culture == "ar" ? "active" : "")"
+                               asp-controller="Language" asp-action="Set" asp-route-culture="ar" asp-route-returnUrl="@returnUrl"
+                               title="@L["language.arabic"]">ع</a>
+                        </div>
+
+                        <button class="icon-btn" type="button" id="themeToggle" data-theme-toggle
+                                aria-label="@L["nav.theme"]" title="@L["nav.theme"]">
+                            <span class="theme-icon theme-icon-light">@Html.Icon("sun", size: 18)</span>
+                            <span class="theme-icon theme-icon-dark">@Html.Icon("moon", size: 18)</span>
+                        </button>
+                    </div>
+
+                    <div class="auth-actions">
+                        @if (currentUser is not null)
+                        {
+                            <a class="btn btn-primary btn-sm write-btn" asp-controller="BlogPost" asp-action="Create">
+                                @Html.Icon("pen", size: 16)
+                                <span>@L["nav.write"]</span>
+                            </a>
+
+                            <div class="dropdown user-menu">
+                                <button class="user-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    @Html.Avatar(avatarUrl, currentUser.Initials, currentUser.DisplayName, "avatar-sm")
+                                    <span class="user-btn-name">@currentUser.DisplayName</span>
+                                    @Html.Icon("chevron-down", "user-btn-chevron", 15)
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li class="dropdown-header">
+                                        <span class="dropdown-user-name">@currentUser.DisplayName</span>
+                                        <span class="dropdown-user-handle">@@@currentUser.UserName</span>
+                                    </li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="User" asp-action="PublicProfile" asp-route-userName="@currentUser.UserName">
+                                            @Html.Icon("user", size: 16) <span>@L["nav.profile"]</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="BlogPost" asp-action="MyPosts">
+                                            @Html.Icon("book-open", size: 16) <span>@L["nav.myPosts"]</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="User" asp-action="EditProfile">
+                                            @Html.Icon("settings", size: 16) <span>@L["nav.settings"]</span>
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider" /></li>
+                                    <li>
+                                        <form asp-controller="User" asp-action="Logout" method="post">
+                                            <button type="submit" class="dropdown-item dropdown-item-danger">
+                                                @Html.Icon("logout", size: 16) <span>@L["nav.logout"]</span>
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </div>
+                        }
+                        else
+                        {
+                            <a class="btn btn-ghost btn-sm" asp-controller="User" asp-action="Login" asp-route-returnUrl="@returnUrl">
+                                @L["nav.login"]
+                            </a>
+                            <a class="btn btn-primary btn-sm" asp-controller="User" asp-action="Signup">
+                                @L["nav.signup"]
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    @if (!string.IsNullOrWhiteSpace(success) || !string.IsNullOrWhiteSpace(error))
+    {
+        <div class="container flash-stack">
+            @if (!string.IsNullOrWhiteSpace(success))
+            {
+                <div class="flash flash-success" role="status">
+                    <span class="flash-icon">@Html.Icon("check", size: 18)</span>
+                    <p>@success</p>
+                    <button type="button" class="flash-close" data-dismiss-flash aria-label="@L["common.close"]">@Html.Icon("x", size: 16)</button>
+                </div>
+            }
+            @if (!string.IsNullOrWhiteSpace(error))
+            {
+                <div class="flash flash-error" role="alert">
+                    <span class="flash-icon">@Html.Icon("alert", size: 18)</span>
+                    <p>@error</p>
+                    <button type="button" class="flash-close" data-dismiss-flash aria-label="@L["common.close"]">@Html.Icon("x", size: 16)</button>
+                </div>
+            }
+        </div>
+    }
+
+    <main id="main-content" class="site-main">
+        @RenderBody()
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a class="brand brand-footer" asp-controller="Home" asp-action="Index">
+                        <span class="brand-mark">@Html.Icon("logo", size: 26)</span>
+                        <span class="brand-text"><span class="brand-name">@brand</span></span>
+                    </a>
+                    <p class="footer-tagline">@L["footer.tagline"]</p>
+                </div>
+
+                <div class="footer-col">
+                    <h2>@L["footer.explore"]</h2>
+                    <a asp-controller="Home" asp-action="Index">@L["nav.home"]</a>
+                    <a asp-controller="BlogPost" asp-action="Index">@L["footer.allArticles"]</a>
+                    <a asp-controller="BlogPost" asp-action="Index" asp-fragment="topics">@L["blog.categories"]</a>
+                </div>
+
+                <div class="footer-col">
+                    <h2>@L["footer.community"]</h2>
+                    @if (currentUser is not null)
+                    {
+                        <a asp-controller="BlogPost" asp-action="Create">@L["footer.writeStory"]</a>
+                        <a asp-controller="BlogPost" asp-action="MyPosts">@L["nav.myPosts"]</a>
+                        <a asp-controller="User" asp-action="PublicProfile" asp-route-userName="@currentUser.UserName">@L["nav.profile"]</a>
+                    }
+                    else
+                    {
+                        <a asp-controller="User" asp-action="Signup">@L["nav.signup"]</a>
+                        <a asp-controller="User" asp-action="Login">@L["nav.login"]</a>
+                        <a asp-controller="BlogPost" asp-action="Index">@L["home.cta"]</a>
+                    }
+                </div>
+
+                <div class="footer-col">
+                    <h2>@L["footer.about"]</h2>
+                    <a asp-controller="Home" asp-action="Privacy">@L["common.privacy"]</a>
+                    <a href="#main-content" class="back-to-top-link">@L["common.back"] ↑</a>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>© @DateTime.Now.Year @brand. @L["footer.rights"]</p>
+                <p>@L["footer.note"]</p>
+            </div>
+        </div>
+    </footer>
+
+    <button type="button" id="backToTop" class="back-to-top" aria-label="@L["common.back"]">
+        @Html.Icon("arrow-up", size: 20)
+    </button>
+
+    <div id="toastRegion" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+    <dialog id="confirmDialog" class="app-dialog">
+        <form method="dialog" class="dialog-card">
+            <div class="dialog-icon dialog-icon-danger">@Html.Icon("alert", size: 22)</div>
+            <h2 id="confirmTitle">@L["common.confirm"]</h2>
+            <p id="confirmText"></p>
+            <div class="dialog-actions">
+                <button type="submit" value="cancel" class="btn btn-ghost" id="confirmCancel">@L["common.cancel"]</button>
+                <button type="submit" value="confirm" class="btn btn-danger" id="confirmAccept">@L["common.confirm"]</button>
+            </div>
+        </form>
+    </dialog>
+
+    <dialog id="promptDialog" class="app-dialog">
+        <form method="dialog" class="dialog-card">
+            <div class="dialog-icon">@Html.Icon("link", size: 22)</div>
+            <h2 id="promptTitle">@L["editor.toolbar.link"]</h2>
+            <div class="form-field">
+                <label for="promptInput" id="promptLabel">@L["editor.linkPrompt"]</label>
+                <input id="promptInput" class="form-control" type="text" dir="ltr" />
+            </div>
+            <div class="form-field" id="promptSecondaryField" hidden>
+                <label for="promptSecondary" id="promptSecondaryLabel">@L["editor.linkTextPrompt"]</label>
+                <input id="promptSecondary" class="form-control" type="text" />
+            </div>
+            <div class="dialog-actions">
+                <button type="submit" value="cancel" class="btn btn-ghost">@L["common.cancel"]</button>
+                <button type="submit" value="confirm" class="btn btn-primary">@L["editor.insert"]</button>
+            </div>
+        </form>
+    </dialog>
+
+    <script>
+        window.BAYAN = {
+            culture: @Json.Serialize(culture),
+            isRtl: @(isRtl ? "true" : "false"),
+            strings: @Json.Serialize(new
+            {
+                loginRequired = L["toast.loginRequired"],
+                loginRequiredText = L["toast.loginRequiredText"],
+                login = L["nav.login"],
+                cancel = L["common.cancel"],
+                confirm = L["common.confirm"],
+                copied = L["common.copied"],
+                copyLink = L["common.copyLink"],
+                error = L["toast.error"],
+                likeError = L["toast.likeError"],
+                uploading = L["editor.uploading"],
+                uploadError = L["editor.uploadError"],
+                imageAlt = L["editor.imageAlt"],
+                linkPrompt = L["editor.linkPrompt"],
+                linkTextPrompt = L["editor.linkTextPrompt"],
+                insert = L["editor.insert"],
+                unsavedTitle = L["editor.unsavedTitle"],
+                unsavedText = L["editor.unsavedText"],
+                leave = L["editor.leave"],
+                stay = L["editor.stay"],
+                showPassword = L["auth.showPassword"],
+                hidePassword = L["auth.hidePassword"],
+                deleteTitle = L["post.deleteTitle"],
+                deleteText = L["post.deleteText"],
+                deleteConfirm = L["post.deleteConfirm"],
+                deleteCancel = L["post.deleteCancel"]
+            })
+        };
+    </script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

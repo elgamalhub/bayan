@@ -1,0 +1,36 @@
+﻿@model PostFormViewModel
+@{
+    ViewData["Title"] = L["editor.editTitle"];
+    ViewData["Description"] = L["editor.editSubtitle"];
+}
+<section class="page-header">
+    <div class="container">
+        <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+            <a asp-controller="Home" asp-action="Index">@L["nav.home"]</a>
+            <span aria-hidden="true">/</span>
+            <a asp-controller="BlogPost" asp-action="MyPosts">@L["nav.myPosts"]</a>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">@L["common.edit"]</span>
+        </nav>
+        <div class="page-header-row">
+            <div>
+                <span class="eyebrow">@L["editor.editTitle"]</span>
+                <h1>@L["editor.editTitle"]</h1>
+                <p>@L["editor.editSubtitle"]</p>
+            </div>
+            <a class="btn btn-ghost" asp-controller="BlogPost" asp-action="Details" asp-route-id="@Model.Id">
+                @Html.Icon("eye", size: 17) @L["my.view"]
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="page-section">
+    <div class="container">
+        <partial name="_PostForm" model="Model" />
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/editor.js" asp-append-version="true"></script>
+}

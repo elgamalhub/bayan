@@ -1,0 +1,112 @@
+@model List<BlogPost>
+@inject IImageService Images
+@{
+    ViewData["Title"] = L["my.title"];
+    ViewData["Description"] = L["my.subtitle"];
+}
+<section class="page-header">
+    <div class="container">
+        <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+            <a asp-controller="Home" asp-action="Index">@L["nav.home"]</a>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">@L["nav.myPosts"]</span>
+        </nav>
+
+        <div class="page-header-row">
+            <div>
+                <span class="eyebrow">@L["nav.write"]</span>
+                <h1>@L["my.title"]</h1>
+                <p>@L["my.subtitle"]</p>
+            </div>
+            <a class="btn btn-primary" asp-controller="BlogPost" asp-action="Create">
+                @Html.Icon("pen", size: 17)
+                @L["my.write"]
+            </a>
+        </div>
+    </div>
+</section>
+
+<section class="page-section">
+    <div class="container">
+        @if (Model.Count == 0)
+        {
+            <div class="state-panel">
+                <div class="state-icon">@Html.Icon("book-open", size: 30)</div>
+                <h2>@L["my.empty"]</h2>
+                <p>@L["my.emptyText"]</p>
+                <div class="state-actions">
+                    <a class="btn btn-primary" asp-controller="BlogPost" asp-action="Create">
+                        @Html.Icon("pen", size: 17)
+                        @L["my.write"]
+                    </a>
+                    <a class="btn btn-ghost" asp-controller="BlogPost" asp-action="Index">@L["nav.articles"]</a>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="my-posts-head">
+                <span class="result-count">@L.Format("blog.results", Model.Count)</span>
+                <a class="text-link" asp-controller="BlogPost" asp-action="Create">
+                    @Html.Icon("plus", size: 16) @L["my.write"]
+                </a>
+            </div>
+
+            <div class="my-posts">
+                @foreach (var post in Model)
+                {
+                    var cover = Images.Url("PostImages", post.ImageUrl);
+                    <article class="my-post-row">
+                        <a class="my-post-cover" asp-controller="BlogPost" asp-action="Details" asp-route-id="@post.Id" tabindex="-1" aria-hidden="true">
+                            @if (!string.IsNullOrWhiteSpace(cover))
+                            {
+                                <img src="@cover" alt="" loading="lazy" />
+                            }
+                            else
+                            {
+                                <span class="cover-placeholder">@Html.Icon("book-open", size: 24)</span>
+                            }
+                        </a>
+
+                        <div class="my-post-main">
+                            <div class="my-post-kicker">
+                                @if (post.Category is not null)
+                                {
+                                    <span class="chip chip-muted">@post.Category.Name</span>
+                                }
+                                <span class="my-post-state">@L["my.published"]</span>
+                            </div>
+                            <h2 class="my-post-title">
+                                <a asp-controller="BlogPost" asp-action="Details" asp-route-id="@post.Id">@post.Title</a>
+                            </h2>
+                            <div class="my-post-meta">
+                                <span>@L.Date(post.CreatedAt)</span>
+                                @if (post.UpdatedAt.HasValue)
+                                {
+                                    <span class="dot"></span>
+                                    <span>@L.Format("my.updated", L.Date(post.UpdatedAt.Value))</span>
+                                }
+                                <span class="dot"></span>
+                                <span>@Html.Icon("heart", size: 14) @post.Likes.Count</span>
+                                <span class="dot"></span>
+                                <span>@Html.Icon("message", size: 14) @post.Comments.Count</span>
+                            </div>
+                        </div>
+
+                        <div class="my-post-actions">
+                            <a class="btn btn-ghost btn-sm" asp-controller="BlogPost" asp-action="Details" asp-route-id="@post.Id">
+                                @Html.Icon("eye", size: 15) @L["my.view"]
+                            </a>
+                            <a class="btn btn-ghost btn-sm" asp-controller="BlogPost" asp-action="Edit" asp-route-id="@post.Id">
+                                @Html.Icon("pen", size: 15) @L["my.edit"]
+                            </a>
+                            <a class="btn btn-ghost btn-sm btn-danger-ghost" asp-controller="BlogPost" asp-action="Delete" asp-route-id="@post.Id">
+                                @Html.Icon("trash", size: 15) @L["my.delete"]
+                            </a>
+                        </div>
+                    </article>
+                }
+            </div>
+        }
+    </div>
+</section>

@@ -1,0 +1,106 @@
+﻿@model RegisterViewModel
+@{
+    ViewData["Title"] = L["auth.signupTitle"];
+    ViewData["Description"] = L["auth.signupSubtitle"];
+    var brand = L.IsRtl ? "بيان" : "Bayan";
+}
+<section class="auth-page">
+    <div class="container auth-shell">
+        <aside class="auth-aside">
+            <a class="brand brand-inverse" asp-controller="Home" asp-action="Index">
+                <span class="brand-mark">@Html.Icon("logo", size: 28)</span>
+                <span class="brand-text">
+                    <span class="brand-name">@brand</span>
+                    <span class="brand-tagline">@L["nav.brandTagline"]</span>
+                </span>
+            </a>
+
+            <div class="auth-aside-copy">
+                <span class="eyebrow eyebrow-inverse">@L["home.eyebrow"]</span>
+                <h2>@L["auth.panelTitle"]</h2>
+                <p>@L["auth.panelText"]</p>
+            </div>
+
+            <ul class="auth-points">
+                <li>@Html.Icon("shield", size: 18) <span>@L["home.why1Title"]</span></li>
+                <li>@Html.Icon("book-open", size: 18) <span>@L["home.why2Title"]</span></li>
+                <li>@Html.Icon("users", size: 18) <span>@L["home.why3Title"]</span></li>
+            </ul>
+
+            <blockquote class="auth-quote">
+                <p>@L["auth.panelQuote"]</p>
+                <cite>@L["auth.panelQuoteAuthor"]</cite>
+            </blockquote>
+        </aside>
+
+        <div class="auth-main">
+            <div class="auth-card">
+                <span class="eyebrow">@L["nav.signup"]</span>
+                <h1>@L["auth.signupTitle"]</h1>
+                <p class="auth-subtitle">@L["auth.signupSubtitle"]</p>
+
+                <div asp-validation-summary="ModelOnly" class="validation-summary" role="alert"></div>
+
+                <form asp-controller="User" asp-action="Register" method="post" class="auth-form">
+                    <div class="form-field">
+                        <label asp-for="Username">@L["auth.username"]</label>
+                        <input asp-for="Username" class="form-control" autocomplete="username"
+                               placeholder="@L["auth.username"]" autofocus />
+                        <span class="form-hint">@L["val.username"]</span>
+                        <span asp-validation-for="Username" class="field-error"></span>
+                    </div>
+
+                    <div class="form-field">
+                        <label asp-for="Email">@L["auth.email"]</label>
+                        <input asp-for="Email" type="email" class="form-control" autocomplete="email"
+                               placeholder="name@example.com" />
+                        <span asp-validation-for="Email" class="field-error"></span>
+                    </div>
+
+                    <div class="form-field">
+                        <label asp-for="Password">@L["auth.password"]</label>
+                        <div class="password-field">
+                            <input asp-for="Password" type="password" class="form-control" autocomplete="new-password"
+                                   placeholder="@L["auth.password"]" />
+                            <button type="button" class="password-toggle" data-password-toggle
+                                    aria-label="@L["auth.showPassword"]" title="@L["auth.showPassword"]">
+                                <span class="password-icon-show">@Html.Icon("eye", size: 18)</span>
+                                <span class="password-icon-hide">@Html.Icon("eye-off", size: 18)</span>
+                            </button>
+                        </div>
+                        <span class="form-hint">@L["auth.passwordHint"]</span>
+                        <span asp-validation-for="Password" class="field-error"></span>
+                    </div>
+
+                    <div class="form-field">
+                        <label asp-for="ConfirmPassword">@L["auth.confirmPassword"]</label>
+                        <div class="password-field">
+                            <input asp-for="ConfirmPassword" type="password" class="form-control" autocomplete="new-password"
+                                   placeholder="@L["auth.confirmPassword"]" />
+                            <button type="button" class="password-toggle" data-password-toggle
+                                    aria-label="@L["auth.showPassword"]" title="@L["auth.showPassword"]">
+                                <span class="password-icon-show">@Html.Icon("eye", size: 18)</span>
+                                <span class="password-icon-hide">@Html.Icon("eye-off", size: 18)</span>
+                            </button>
+                        </div>
+                        <span asp-validation-for="ConfirmPassword" class="field-error"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        @L["auth.signupButton"]
+                        @Html.Icon("arrow-right", size: 17)
+                    </button>
+                </form>
+
+                <p class="auth-switch">
+                    @L["auth.hasAccount"]
+                    <a asp-controller="User" asp-action="Login">@L["auth.loginLink"]</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

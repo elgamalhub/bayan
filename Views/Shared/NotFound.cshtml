@@ -1,0 +1,16 @@
+@{
+    ViewData["Title"] = L["notfound.title"];
+}
+<section class="page-section">
+    <div class="container narrow-container">
+        <div class="state-panel">
+            <div class="state-code">404</div>
+            <h1>@L["notfound.title"]</h1>
+            <p>@L["notfound.text"]</p>
+            <div class="state-actions">
+                <a class="btn btn-primary" asp-controller="Home" asp-action="Index">@L["error.home"]</a>
+                <a class="btn btn-ghost" asp-controller="BlogPost" asp-action="Index">@L["nav.articles"]</a>
+            </div>
+        </div>
+    </div>
+</section>

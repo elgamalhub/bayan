@@ -1,0 +1,33 @@
+﻿@model PostFormViewModel
+@{
+    ViewData["Title"] = L["editor.createTitle"];
+    ViewData["Description"] = L["editor.createSubtitle"];
+}
+<section class="page-header">
+    <div class="container">
+        <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+            <a asp-controller="Home" asp-action="Index">@L["nav.home"]</a>
+            <span aria-hidden="true">/</span>
+            <a asp-controller="BlogPost" asp-action="Index">@L["nav.articles"]</a>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">@L["nav.write"]</span>
+        </nav>
+        <div class="page-header-row">
+            <div>
+                <span class="eyebrow">@L["editor.createTitle"]</span>
+                <h1>@L["editor.createTitle"]</h1>
+                <p>@L["editor.createSubtitle"]</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="page-section">
+    <div class="container">
+        <partial name="_PostForm" model="Model" />
+    </div>
+</section>
+
+@section Scripts {
+    <script src="~/js/editor.js" asp-append-version="true"></script>
+}

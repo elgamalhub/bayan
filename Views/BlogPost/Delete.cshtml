@@ -1,0 +1,69 @@
+﻿@model BlogPost
+@inject IImageService Images
+@{
+    ViewData["Title"] = L["post.deleteTitle"];
+    ViewData["Description"] = L["post.deleteText"];
+    var cover = Images.Url("PostImages", Model.ImageUrl);
+    var categoryName = Model.Category?.Name;
+}
+<section class="page-section delete-page">
+    <div class="container narrow-container">
+        <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+            <a asp-controller="Home" asp-action="Index">@L["nav.home"]</a>
+            <span aria-hidden="true">/</span>
+            <a asp-controller="BlogPost" asp-action="MyPosts">@L["nav.myPosts"]</a>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">@L["common.delete"]</span>
+        </nav>
+
+        <div class="delete-card">
+            <div class="delete-icon">@Html.Icon("trash", size: 26)</div>
+            <span class="eyebrow">@L["delete.subtitle"]</span>
+            <h1>@L["post.deleteTitle"]</h1>
+            <p class="delete-lead">@L["post.deleteText"]</p>
+
+            <div class="delete-preview">
+                <div class="delete-preview-cover">
+                    @if (!string.IsNullOrWhiteSpace(cover))
+                    {
+                        <img src="@cover" alt="" />
+                    }
+                    else
+                    {
+                        <span class="cover-placeholder">@Html.Icon("book-open", size: 28)</span>
+                    }
+                </div>
+                <div class="delete-preview-body">
+                    @if (!string.IsNullOrWhiteSpace(categoryName))
+                    {
+                        <span class="chip chip-muted">@categoryName</span>
+                    }
+                    <h2>@Model.Title</h2>
+                    <div class="delete-meta">
+                        <span>@L.Format("post.published", L.Date(Model.CreatedAt))</span>
+                        <span class="dot"></span>
+                        <span>@Model.Comments.Count @L["delete.comments"]</span>
+                        <span class="dot"></span>
+                        <span>@Model.Likes.Count @L["delete.likes"]</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="delete-warning" role="note">
+                @Html.Icon("alert", size: 19)
+                <p>@L["delete.warning"]</p>
+            </div>
+
+            <form class="delete-actions" asp-controller="BlogPost" asp-action="Delete" method="post">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <a class="btn btn-ghost" asp-controller="BlogPost" asp-action="Details" asp-route-id="@Model.Id">
+                    @L["delete.keep"]
+                </a>
+                <button type="submit" class="btn btn-danger">
+                    @Html.Icon("trash", size: 17)
+                    @L["post.deleteConfirm"]
+                </button>
+            </form>
+        </div>
+    </div>
+</section>
