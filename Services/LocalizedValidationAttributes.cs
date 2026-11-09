@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 
-namespace StudyWithChatgpt.Services
+namespace Bayan.Services
 {
     public class LocalizedRequiredAttribute : RequiredAttribute
     {

@@ -1,7 +1,7 @@
-using StudyWithChatgpt.Models;
-using StudyWithChatgpt.Services;
+using Bayan.Models;
+using Bayan.Services;
 
-namespace StudyWithChatgpt.ViewModels
+namespace Bayan.ViewModels
 {
     public class HomeViewModel
     {

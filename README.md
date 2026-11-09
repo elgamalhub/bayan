@@ -56,7 +56,7 @@ dotnet tool install --global dotnet-ef --version 9.*
    ```json
    {
      "ConnectionStrings": {
-       "Default": "Server=YOUR_SERVER;Database=StudyWithChatgpt;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=true"
+       "Default": "Server=YOUR_SERVER;Database=Bayan;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=true"
      }
    }
    ```
@@ -83,7 +83,7 @@ dotnet tool install --global dotnet-ef --version 9.*
 Registration creates a normal `User` account. To promote an account, run the following against the application database (replace the username):
 
 ```sql
-USE StudyWithChatgpt;
+USE Bayan;
 
 DECLARE @userId nvarchar(450) =
     (SELECT Id FROM AspNetUsers WHERE UserName = 'your-username');

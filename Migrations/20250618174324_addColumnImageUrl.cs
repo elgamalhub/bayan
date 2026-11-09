@@ -1,8 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace StudyWithChatgpt.Migrations
+namespace Bayan.Migrations
 {
     /// <inheritdoc />
     public partial class addColumnImageUrl : Migration

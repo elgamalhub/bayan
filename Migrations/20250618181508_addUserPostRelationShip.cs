@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace StudyWithChatgpt.Migrations
+namespace Bayan.Migrations
 {
     /// <inheritdoc />
     public partial class addUserPostRelationShip : Migration

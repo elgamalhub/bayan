@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore.Migrations;
-using StudyWithChatgpt.Models;
+using Bayan.Models;
 
 #nullable disable
 
-namespace StudyWithChatgpt.Migrations
+namespace Bayan.Migrations
 {
     /// <inheritdoc />
     public partial class SeedRolesAndAdminUser : Migration

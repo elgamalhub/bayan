@@ -1,4 +1,4 @@
-namespace StudyWithChatgpt.Services
+namespace Bayan.Services
 {
     public interface IImageService
     {

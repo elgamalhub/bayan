@@ -1,4 +1,4 @@
-namespace StudyWithChatgpt.Models
+namespace Bayan.Models
 {
     public class ErrorViewModel
     {

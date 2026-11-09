@@ -1,6 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
-namespace StudyWithChatgpt.Models
+namespace Bayan.Models
 {
     public class Category
     {

@@ -2,7 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace StudyWithChatgpt.Helper
+namespace Bayan.Helper
 {
     /// <summary>
     /// Small inline SVG icon set. Avoids external icon CDNs and keeps the

@@ -3,7 +3,7 @@ using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
 
-namespace StudyWithChatgpt.Services
+namespace Bayan.Services
 {
     /// <summary>
     /// Handles storage, sanitisation and presentation of article content.

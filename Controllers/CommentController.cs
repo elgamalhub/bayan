@@ -1,12 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using StudyWithChatgpt.Models;
-using StudyWithChatgpt.Services;
-using StudyWithChatgpt.ViewModels;
+using Bayan.Models;
+using Bayan.Services;
+using Bayan.ViewModels;
 
-namespace StudyWithChatgpt.Controllers
+namespace Bayan.Controllers
 {
     public class CommentController : Controller
     {

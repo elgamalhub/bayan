@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace StudyWithChatgpt.Services
+namespace Bayan.Services
 {
     /// <summary>
     /// Lightweight, dependency-free string catalogue for the bilingual UI.

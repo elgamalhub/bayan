@@ -2,10 +2,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using StudyWithChatgpt.Models;
-using StudyWithChatgpt.Services;
+using Bayan.Models;
+using Bayan.Services;
 
-namespace StudyWithChatgpt.Controllers.Api
+namespace Bayan.Controllers.Api
 {
     [ApiController]
     [Authorize]

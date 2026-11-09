@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace StudyWithChatgpt.Models
+namespace Bayan.Models
 {
     public class AppDbContext : IdentityDbContext<ApplicationUser>
     {

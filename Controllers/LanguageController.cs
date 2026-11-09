@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
-using StudyWithChatgpt.Services;
+using Bayan.Services;
 
-namespace StudyWithChatgpt.Controllers
+namespace Bayan.Controllers
 {
     [Route("language")]
     public class LanguageController : Controller

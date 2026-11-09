@@ -2,8 +2,8 @@ using System.Globalization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
-using StudyWithChatgpt.Models;
-using StudyWithChatgpt.Services;
+using Bayan.Models;
+using Bayan.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

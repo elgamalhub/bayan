@@ -1,7 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Identity;
 
-namespace StudyWithChatgpt.Models
+namespace Bayan.Models
 {
     public class ApplicationUser : IdentityUser
     {
